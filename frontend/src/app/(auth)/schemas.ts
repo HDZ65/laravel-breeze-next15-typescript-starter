@@ -9,7 +9,7 @@ export const LoginSchema = z.object({
     .min(6, "Le mot de passe doit contenir au moins 6 caractères")
     .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
     .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
-  remember: z.boolean().optional()
+  remember: z.boolean().default(false)
 })
 
 // schéma d'inscription

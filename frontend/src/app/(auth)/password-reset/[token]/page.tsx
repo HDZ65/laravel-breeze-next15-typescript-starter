@@ -11,7 +11,6 @@
 
 import { useEffect, useState, FormEvent } from 'react'
 import { useSearchParams, useParams } from 'next/navigation'
-import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
 import { useAuth } from '@/hooks/auth'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -34,7 +33,6 @@ const PasswordReset = (): JSX.Element => {
     const [password, setPassword] = useState<string>('')
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
     const [errors, setErrors] = useState<FormErrors>({})
-    const [status, setStatus] = useState<string | null>(null)
 
     const submitForm = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -47,7 +45,6 @@ const PasswordReset = (): JSX.Element => {
             password_confirmation: passwordConfirmation,
             token,
             setErrors,
-            setStatus,
         })
     }
 
@@ -58,7 +55,6 @@ const PasswordReset = (): JSX.Element => {
 
     return (
         <>
-            <AuthSessionStatus className="mb-4" status={status} />
 
             <form onSubmit={submitForm} noValidate>
                 <div>

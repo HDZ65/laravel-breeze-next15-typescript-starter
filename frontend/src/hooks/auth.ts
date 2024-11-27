@@ -63,13 +63,13 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
 
         setErrors({})
         setStatus(null)
-
         axios
             .post('/login', props)
             .then(() => mutate())
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
+                setStatus(error.response.data.message)
                 setErrors(error.response.data.errors)
             })
     }
@@ -90,10 +90,16 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
     }
 
     const logout = async () => {
-        if (!error) {
-            await axios.post('/logout').then(() => mutate())
+        try {
+            if (!error) {
+                await axios.post('/logout')
+            }
+            await mutate(null, false)
+            router.push('/login')
+        } catch (err) {
+            console.error('Erreur lors de la déconnexion:', err)
+            router.push('/login')
         }
-        router.push('/login')
     }
 
     const forgotPassword = async ({ setErrors, setStatus, email }: ForgotPasswordCredentials) => {
@@ -139,8 +145,9 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         if (middleware === 'guest' && redirectIfAuthenticated && user)
             router.push(redirectIfAuthenticated)
 
-        if (middleware === 'auth' && !user?.email_verified_at)
-            router.push('/verify-email')
+        // ============ Ajouter si on veut vérifier l'email à la connexion ============
+        // if (middleware === 'auth' && !user?.email_verified_at)
+        //     router.push('/verify-email')
         
         if (
             window.location.pathname === '/verify-email' &&

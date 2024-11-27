@@ -1,3 +1,6 @@
+// Titre principal du fichier
+// Composant de formulaire d'inscription avec gestion d'état, validation et accessibilité
+
 'use client'
 
 import { useAuth } from '@/hooks/auth'
@@ -16,17 +19,19 @@ import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 import { cn } from "@/lib/utils"
 import { PasswordStrength } from "./password-strength"
 
-
 export function RegisterForm() {
+    // États locaux pour gérer l'affichage du mot de passe, l'état de chargement et les erreurs
     const [showPassword, setShowPassword] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [errors, setErrors] = useState<Record<string, string[]>>({})
 
+    // Hook d'authentification personnalisé
     const { register: registerAuth } = useAuth({
         middleware: 'guest',
         redirectIfAuthenticated: '/dashboard'
     })
 
+    // Configuration du formulaire avec react-hook-form et zod pour la validation
     const form = useForm<RegisterFormData>({
         resolver: zodResolver(RegisterSchema),
         defaultValues: {
@@ -39,6 +44,7 @@ export function RegisterForm() {
         mode: "onChange"
     })
 
+    // Fonction de soumission du formulaire
     const onSubmit = async (data: RegisterFormData) => {
         setIsPending(true)
         try {
@@ -56,10 +62,12 @@ export function RegisterForm() {
         }
     }
 
+    // Surveillance de la valeur du champ mot de passe pour la vérification de force
     const password = form.watch("password")
 
     return (
         <Card className="w-full max-w-md">
+            {/* En-tête du formulaire */}
             <CardHeader>
                 <CardTitle className="text-2xl font-medium">S&apos;inscrire</CardTitle>
                 <CardDescription>
@@ -68,10 +76,12 @@ export function RegisterForm() {
             </CardHeader>
 
             <CardContent>
+                {/* Formulaire d'inscription */}
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-6"
                 >
+                    {/* Champ Nom */}
                     <div className="space-y-2">
                         <Label htmlFor="name">Nom</Label>
                         <div className="relative">
@@ -92,6 +102,7 @@ export function RegisterForm() {
                         )}
                     </div>
 
+                    {/* Champ Email */}
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="relative">
@@ -112,6 +123,7 @@ export function RegisterForm() {
                         )}
                     </div>
 
+                    {/* Champ Mot de passe */}
                     <div className="space-y-2">
                         <Label htmlFor="password">Mot de passe</Label>
                         <div className="relative">
@@ -153,6 +165,7 @@ export function RegisterForm() {
                         )}
                     </div>
 
+                    {/* Champ Confirmation du mot de passe */}
                     <div className="space-y-2">
                         <Label htmlFor="password_confirmation">Confirmer le mot de passe</Label>
                         <div className="relative">
@@ -186,6 +199,7 @@ export function RegisterForm() {
                         )}
                     </div>
 
+                    {/* Case à cocher "Se souvenir de moi" */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <Checkbox
@@ -210,6 +224,7 @@ export function RegisterForm() {
                         </div>
                     </div>
 
+                    {/* Bouton de soumission */}
                     <Button
                         type="submit"
                         className="w-full"
@@ -217,11 +232,15 @@ export function RegisterForm() {
                     >
                         {isPending ? "Inscription en cours..." : "S'inscrire"}
                     </Button>
+
+                    {/* Affichage des erreurs */}
                     {Object.keys(errors).length > 0 && (
                         <p className="text-center text-sm text-destructive">
                             {errors.email}
                         </p>
                     )}
+
+                    {/* Lien vers la page de connexion */}
                     <p className="text-center text-sm text-muted-foreground">
                         Vous avez déjà un compte ?{" "}
                         <Link
