@@ -10,8 +10,6 @@
 
 Un starter kit moderne combinant Next.js 15 et Laravel 11 avec une authentification robuste et une interface utilisateur élégante utilisant shadcn/ui. Idéal pour démarrer rapidement des projets professionnels.
 
-![Capture d'écran du Dashboard](./screenshots/dashboard.png)
-
 ## ✨ Fonctionnalités
 
 - 🔐 **Authentification Complète**
