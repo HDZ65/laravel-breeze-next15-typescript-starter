@@ -10,7 +10,6 @@
 
 Un starter kit moderne combinant Next.js 15 et Laravel 11 avec une authentification robuste et une interface utilisateur élégante utilisant shadcn/ui. Idéal pour démarrer rapidement des projets professionnels.
 
-English:
 A modern full-stack TypeScript starter kit combining Laravel 11 Breeze and Next.js 15. Features type-safe authentication, shadcn/ui components, and Zod validation. Perfect for building secure, scalable web applications with a great developer experience.
 
 ## ✨ Fonctionnalités
