@@ -21,7 +21,7 @@ export default function Loading() {
                 >
                     {/* Barre de chargement horizontale */}
                     <Skeleton
-                        className="w-full h-16 bg-muted/50"
+                        className="w-full h-11 bg-muted/50"
                         aria-label="Chargement de la barre latérale"
                     />
 

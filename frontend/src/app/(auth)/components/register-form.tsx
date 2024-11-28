@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/auth'
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { RegisterSchema, type RegisterFormData } from "../schemas"
+import { RegisterSchema, type RegisterFormData } from "../../../schemas/auth-schema"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Hook d'authentification principal
+ * Gère toutes les fonctionnalités d'authentification de l'application
+ * @author VotreNom
+ * @lastModified 2024-XX-XX
+ */
+
 import useSWR from 'swr'
 import axios from '@/services/axios'
 import { useEffect } from 'react'
@@ -17,7 +24,7 @@ interface AuthErrors {
 interface LoginCredentials extends AuthErrors {
     email: string
     password: string
-    setStatus: (status: string | null) => void
+    updateIsPending: (isPending: boolean) => void
 }
 
 interface RegisterCredentials extends AuthErrors {
@@ -36,7 +43,7 @@ interface ResetPasswordCredentials extends AuthErrors {
 
 interface ForgotPasswordCredentials extends AuthErrors {
     email: string
-    setStatus: (status: string | null) => void
+    updateIsPending: (isPending: boolean) => void
 }
 
 // ============ Auth Hook ============
@@ -58,19 +65,24 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
     // ============ API Methods ============
     const csrf = () => axios.get('/sanctum/csrf-cookie')
 
-    const login = async ({ setErrors, setStatus, ...props }: LoginCredentials) => {
+    const login = async ({ setErrors,  updateIsPending, ...props }: LoginCredentials) => {
         await csrf()
 
         setErrors({})
-        setStatus(null)
         axios
             .post('/login', props)
             .then(() => mutate())
             .catch(error => {
+                console.log("heure: d'execution", new Date().toISOString());
                 if (error.response.status !== 422) throw error
-
-                setStatus(error.response.data.message)
-                setErrors(error.response.data.errors)
+                
+                if (error.response.data.errors) {
+                    setErrors({
+                        message: "Email ou mot de passe incorrect",
+                        ...error.response.data.errors
+                    })
+                }
+                updateIsPending(false)
             })
     }
 
@@ -102,17 +114,17 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         }
     }
 
-    const forgotPassword = async ({ setErrors, setStatus, email }: ForgotPasswordCredentials) => {
+    const forgotPassword = async ({ setErrors,  updateIsPending, email }: ForgotPasswordCredentials) => {
         await csrf()
         setErrors({})
-        setStatus(null)
         axios
             .post('/forgot-password', { email })
-            .then(response => setStatus(response.data.status))
+            .then(() => mutate()) 
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
                 setErrors(error.response.data.errors)
+                updateIsPending(false)
             })
     }
 
@@ -155,7 +167,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         )
             router.push(redirectIfAuthenticated || '/')
         if (middleware === 'auth' && error) logout()
-    }, [user, error])
+    }, [user, error ])
 
     // ============ Return Values ============
     return {

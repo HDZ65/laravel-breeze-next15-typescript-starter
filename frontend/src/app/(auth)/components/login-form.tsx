@@ -3,10 +3,10 @@
 
 'use client'
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LoginSchema, type LoginFormData } from "../schemas"
+import { LoginSchema, type LoginFormData } from "../../../schemas/auth-schema"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,11 +20,12 @@ import { useAuth } from "@/hooks/auth"
 import { Loader2 } from "lucide-react"
 
 export function LoginForm() {
+
   // États locaux pour gérer l'affichage du mot de passe, l'état de chargement, les erreurs et le statut
   const [showPassword, setShowPassword] = useState(false)
   const [isPending, setIsPending] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]>>({})
-  const [status, setStatus] = useState<string | null>(null)
+
   // Hook d'authentification personnalisé
   const { login: loginAuth } = useAuth({
     middleware: 'guest',
@@ -41,26 +42,30 @@ export function LoginForm() {
     }
   })
 
+  // Fonction pour mettre à jour l'état de chargement
+  const updateIsPending = useCallback((isPending: boolean) => {
+    setIsPending(isPending)
+  }, [])
+
   // Fonction de soumission du formulaire
   const onSubmit = async (data: LoginFormData) => {
     setIsPending(true)
-    setErrors({}) // Réinitialiser les erreurs à chaque tentative
+    setErrors({}) 
     try {
       await loginAuth({
         email: data.email,
         password: data.password,
         setErrors,
-        setStatus
+        updateIsPending
       })
+
     } catch (error) {
       console.error('Erreur de connexion:', error)
-    } finally {
-      setIsPending(false)
     }
   }
 
+
   return (
-    <>
       <Card className="w-full max-w-md">
         {/* En-tête du formulaire */}
         <CardHeader>
@@ -169,18 +174,19 @@ export function LoginForm() {
                 Mot de passe oublié ?
               </Link>
             </div>
-            
-             {/* Affichage des erreurs */}
-             {Object.keys(errors).length > 0 && (
-              <p className="text-center text-sm  text-destructive">
-                Email ou mot de passe incorrect
-              </p>
-            )}
-            {Object.keys(errors).length === 0 && status && (
-              <p className="text-center text-sm  text-success">
-                Connexion réussie
-              </p>
-            )}
+
+            {/* Affichage des messages d'erreur et de succès */}
+
+              {errors.message && (
+                <p 
+                  className="text-center text-sm text-destructive"
+                  role="alert"
+                >
+                  <span className="sr-only">Erreur : </span>
+                  {errors.message}
+                </p> 
+              )}
+
 
             {/* Bouton de soumission */}
             <Button
@@ -198,7 +204,7 @@ export function LoginForm() {
               )}
             </Button>
 
-           
+
 
             {/* Lien vers la page d'inscription */}
             <p className="text-center text-sm text-muted-foreground">
@@ -213,6 +219,5 @@ export function LoginForm() {
           </form>
         </CardContent>
       </Card>
-    </>
   )
 }
