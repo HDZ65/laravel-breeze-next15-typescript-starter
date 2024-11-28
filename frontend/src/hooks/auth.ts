@@ -166,18 +166,28 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
 
     // ============ Navigation Middleware ============
     useEffect(() => {
+        // Attendre que les données soient chargées avant d'effectuer les redirections
+        if (!user && !error) return
+
         if (middleware === 'guest' && redirectIfAuthenticated && user)
             router.push(redirectIfAuthenticated)
 
-        // ============ Ajouter si on veut vérifier l'email à la connexion ============
-        // if (middleware === 'auth' && !user?.email_verified_at)
-        //     router.push('/verify-email')
-
+        // Modification de la condition pour la vérification d'email
+        if (
+            middleware === 'auth' && 
+            user && 
+            !user.email_verified_at && 
+            window.location.pathname !== '/verify-email'
+        ) {
+            router.push('/verify-email')
+        }
         if (
             window.location.pathname === '/verify-email' &&
             user?.email_verified_at
-        )
+        ) {
             router.push(redirectIfAuthenticated || '/')
+        }
+
         if (middleware === 'auth' && error) logout()
     }, [user, error])
 

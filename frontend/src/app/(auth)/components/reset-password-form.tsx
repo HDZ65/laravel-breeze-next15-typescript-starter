@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/auth"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useParams } from "next/navigation"
+import { PasswordStrength } from "./password-strength"
 
 export function ResetPasswordForm() {
 
@@ -79,9 +80,9 @@ export function ResetPasswordForm() {
         <Card className="w-full max-w-md">
             {/* En-tête du formulaire */}
             <CardHeader>
-                <CardTitle className="text-2xl font-medium">Se connecter</CardTitle>
+                <CardTitle className="text-2xl font-medium">Réinitialiser le mot de passe</CardTitle>
                 <CardDescription>
-                    Entrez vos identifiants pour accéder à votre compte
+                    Entrez votre nouveau mot de passe
                 </CardDescription>
             </CardHeader>
 
@@ -158,6 +159,7 @@ export function ResetPasswordForm() {
                             </p>
                         )}
                     </div>
+                    <PasswordStrength password={form.watch('password')} />
 
                     {/* Champ Confirmation du mot de passe */}
                     <div className="space-y-2">
