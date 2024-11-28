@@ -33,19 +33,21 @@ export const RegisterSchema = z.object({
 
 // Schéma de réinitialisation de mot de passe
 export const ResetPasswordSchema = z.object({
+    email: z.string().email("L'email est invalide"),
+    password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+    password_confirmation: z.string(),
+    token: z.string()
+}).refine((data) => data.password === data.password_confirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["password_confirmation"]
+})
+
+export const ForgotPasswordSchema = z.object({
   email: z.string()
     .email("Veuillez entrer une adresse email valide"),
-  token: z.string(),
-  password: z.string()
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères")
-    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
-    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
-  password_confirmation: z.string()
-}).refine((data) => data.password === data.password_confirmation, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["password_confirmation"],
 })
 
 export type LoginFormData = z.infer<typeof LoginSchema>
 export type RegisterFormData = z.infer<typeof RegisterSchema>
 export type ResetPasswordFormData = z.infer<typeof ResetPasswordSchema>
+export type ForgotPasswordFormData = z.infer<typeof ForgotPasswordSchema>

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/auth'
 import { useCallback, useState } from 'react'
 import { MdEmail } from 'react-icons/md'
-import { ResetPasswordFormData, ResetPasswordSchema } from '@/schemas/auth-schema'
+import { ForgotPasswordFormData, ForgotPasswordSchema } from '@/schemas/auth-schema'
 import { Loader2 } from 'lucide-react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,15 +29,14 @@ export default function ForgotPasswordForm() {
         setIsPending(isPending)
     }, [])
     // Configuration du formulaire avec react-hook-form et zod pour la validation
-    const form = useForm<ResetPasswordFormData>({
-        resolver: zodResolver(ResetPasswordSchema),
+    const form = useForm<ForgotPasswordFormData>({
+        resolver: zodResolver(ForgotPasswordSchema),
         defaultValues: {
             email: '',
         }
     })
 
-    const onSubmit = async (data: ResetPasswordFormData) => {
-        console.log("onSubmit", new Date().toISOString());
+    const onSubmit = async (data: ForgotPasswordFormData) => {
 
         setIsPending(true)
         setErrors({})
@@ -53,7 +52,7 @@ export default function ForgotPasswordForm() {
             })
         } catch (error) {
             console.error('Erreur de connexion:', error)
-            setIsPending(false)
+            
         }
     }
 
@@ -106,7 +105,7 @@ export default function ForgotPasswordForm() {
                     )}
 
                     {/* Affichage des erreurs générales */}
-                    {form.formState.errors.root && (
+                    {form.formState.errors.root && form.formState.errors.root.type !== 'success' && (
                         <Alert variant="destructive">
                             <AlertDescription>
                                 {form.formState.errors.root.message}

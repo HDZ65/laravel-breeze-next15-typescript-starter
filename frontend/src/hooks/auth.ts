@@ -35,9 +35,11 @@ interface RegisterCredentials extends AuthErrors {
 }
 
 interface ResetPasswordCredentials extends AuthErrors {
+    email: string
     password: string
     password_confirmation: string
-    setStatus: (status: string | null) => void
+    token: string
+    updateIsPending: (isPending: boolean) => void
 }
 
 
@@ -65,7 +67,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
     // ============ API Methods ============
     const csrf = () => axios.get('/sanctum/csrf-cookie')
 
-    const login = async ({ setErrors,  updateIsPending, ...props }: LoginCredentials) => {
+    const login = async ({ setErrors, updateIsPending, ...props }: LoginCredentials) => {
         await csrf()
 
         setErrors({})
@@ -75,7 +77,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
             .catch(error => {
                 console.log("heure: d'execution", new Date().toISOString());
                 if (error.response.status !== 422) throw error
-                
+
                 if (error.response.data.errors) {
                     setErrors({
                         message: "Email ou mot de passe incorrect",
@@ -114,28 +116,35 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         }
     }
 
-    const forgotPassword = async ({ setErrors,  updateIsPending, email }: ForgotPasswordCredentials) => {
+    const forgotPassword = async ({ setErrors, updateIsPending, email }: ForgotPasswordCredentials) => {
         await csrf()
         setErrors({})
         axios
             .post('/forgot-password', { email })
-            .then(() => mutate()) 
+            .then(() => mutate())
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
                 setErrors(error.response.data.errors)
                 updateIsPending(false)
             })
+        updateIsPending(false)
+
     }
 
-    const resetPassword = async ({ setErrors, setStatus, ...props }: ResetPasswordCredentials) => {
+    const resetPassword = async ({ setErrors, updateIsPending, email, password, password_confirmation }: ResetPasswordCredentials) => {
         await csrf()
 
         setErrors({})
-        setStatus(null)
+        updateIsPending(true)
 
         axios
-            .post('/reset-password', { token: params.token, ...props })
+            .post('/reset-password', { 
+                email,
+                password,
+                password_confirmation,
+                token: params.token 
+            })
             .then(response =>
                 router.push('/login?reset=' + btoa(response.data.status)),
             )
@@ -143,7 +152,10 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
                 if (error.response.status !== 422) throw error
 
                 setErrors(error.response.data.errors)
+                updateIsPending(false)
             })
+
+        updateIsPending(false)
     }
 
     const resendEmailVerification = ({ setStatus }: { setStatus: (status: string | null) => void }) => {
@@ -160,14 +172,14 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         // ============ Ajouter si on veut vérifier l'email à la connexion ============
         // if (middleware === 'auth' && !user?.email_verified_at)
         //     router.push('/verify-email')
-        
+
         if (
             window.location.pathname === '/verify-email' &&
             user?.email_verified_at
         )
             router.push(redirectIfAuthenticated || '/')
         if (middleware === 'auth' && error) logout()
-    }, [user, error ])
+    }, [user, error])
 
     // ============ Return Values ============
     return {
