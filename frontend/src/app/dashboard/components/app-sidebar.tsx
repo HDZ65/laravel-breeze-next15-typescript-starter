@@ -1,21 +1,7 @@
 "use client"
 
-import * as React from "react"
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react"
-
+import { useAuth } from "@/hooks/auth"
 import { NavMain } from "./nav-main"
-// import { NavProjects } from "./nav-projects"
 import { NavUser } from "./nav-user"
 import {
   Sidebar,
@@ -25,146 +11,30 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { TeamSwitcher } from "./nav-switcher"
-import { useAuth } from "@/hooks/auth"
+import { data } from "../data-dashboard"
 
-
-// This is sample data.
-const data = {
-
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Gratuit",
-    },
-  ],
-  navMain: [
-    {
-      title: "Espace de travail",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Historique",
-          url: "#",
-        },
-        {
-          title: "Favoris",
-          url: "#",
-        },
-        {
-          title: "Paramètres",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Modèles",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorateur",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Premiers pas",
-          url: "#",
-        },
-        {
-          title: "Tutoriels",
-          url: "#",
-        },
-        {
-          title: "Notes de version",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Paramètres",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "Général",
-          url: "#",
-        },
-        {
-          title: "Équipe",
-          url: "#",
-        },
-        {
-          title: "Facturation",
-          url: "#",
-        },
-        {
-          title: "Limites",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design & Ingénierie",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Ventes & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Voyages",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
-
+/**
+ * Barre latérale principale du dashboard
+ * @param {React.ComponentProps<typeof Sidebar>} props - Les propriétés du composant
+ * @returns {JSX.Element} La barre latérale
+ */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth({ middleware: 'auth' })
 
+  if (!user) return null
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar 
+      collapsible="icon" 
+      {...props}
+      role="navigation"
+      aria-label="Navigation principale"
+    >
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

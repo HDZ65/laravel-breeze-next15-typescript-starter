@@ -54,16 +54,34 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
     const params = useParams()
 
     // ============ Data Fetching ============
-    const { data: user, error, mutate } = useSWR('/api/user', () =>
-        axios
-            .get('/api/user')
-            .then(res => res.data)
-            .catch(error => {
-                if (error.response.status !== 409) throw error
-
-                router.push('/verify-email')
-            }),
+    const { data: user, error, mutate } = useSWR(
+        // Ne pas faire la requête sur les pages de reset password et forgot password
+        window.location.pathname.startsWith('/reset-password') || 
+        window.location.pathname.startsWith('/forgot-password') 
+            ? null 
+            : '/api/user',
+        () =>
+            axios
+                .get('/api/user')
+                .then(res => res.data)
+                .catch(error => {
+                    if (error.response?.status === 401 && 
+                        !window.location.pathname.startsWith('/reset-password') && 
+                        !window.location.pathname.startsWith('/forgot-password')
+                    ) {
+                        router.push('/login')
+                    }
+                    throw error
+                }),
+        {
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            refreshInterval: 0,
+            dedupingInterval: 60000,
+            shouldRetryOnError: false
+        }
     )
+
     // ============ API Methods ============
     const csrf = () => axios.get('/sanctum/csrf-cookie')
 
@@ -200,6 +218,5 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         forgotPassword,
         resetPassword,
         resendEmailVerification,
-        isLoading: !error && !user,
     }
 }
