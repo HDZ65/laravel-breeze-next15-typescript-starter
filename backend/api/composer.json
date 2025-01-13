@@ -1,0 +1,10 @@
+{
+    "require": {
+        "php": "^8.2",
+        "ext-openssl": "*"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist"
+    }
+}
