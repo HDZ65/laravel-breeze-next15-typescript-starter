@@ -33,6 +33,9 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+        
+        // Envoi explicite de l'email de vérification
+        $user->sendEmailVerificationNotification();
 
         Auth::login($user);
 

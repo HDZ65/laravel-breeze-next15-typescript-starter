@@ -9,6 +9,7 @@ import useSWR from 'swr'
 import axios from '@/services/axios'
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { AxiosError } from 'axios'
 
 // ============ Types ============
 
@@ -48,6 +49,10 @@ interface ForgotPasswordCredentials extends AuthErrors {
     updateIsPending: (isPending: boolean) => void
 }
 
+interface DeleteAccountCredentials extends AuthErrors {
+    password: string
+}
+
 // ============ Auth Hook ============
 export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {}) => {
     const router = useRouter()
@@ -55,9 +60,12 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
 
     // ============ Data Fetching ============
     const { data: user, error, mutate } = useSWR(
-        // Ne pas faire la requête sur les pages de reset password et forgot password
-        window.location.pathname.startsWith('/reset-password') || 
-        window.location.pathname.startsWith('/forgot-password') 
+        // Ne pas faire de requête si on est sur les pages d'auth
+        window.location.pathname === '/login' ||
+        window.location.pathname === '/register' ||
+        window.location.pathname === '/forgot-password' ||
+        window.location.pathname === '/reset-password' ||
+        middleware === 'guest'
             ? null 
             : '/api/user',
         () =>
@@ -65,11 +73,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
                 .get('/api/user')
                 .then(res => res.data)
                 .catch(error => {
-                    if (error.response?.status === 401 && 
-                        !window.location.pathname.startsWith('/reset-password') && 
-                        !window.location.pathname.startsWith('/forgot-password')
-                    ) {
-                        router.push('/login')
+                    if (error.response?.status === 401) {
+                        return null
                     }
                     throw error
                 }),
@@ -111,14 +116,18 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
 
         setErrors({})
 
-        axios
-            .post('/register', props)
-            .then(() => mutate())
-            .catch(error => {
-                if (error.response.status !== 422) throw error
-
-                setErrors(error.response.data.errors)
-            })
+        try {
+            await axios.post('/register', props)
+ 
+            setTimeout(() => {
+                mutate()
+                router.push('/verify-email')   
+            }, 1000)
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<{errors: Record<string, string[]>}>
+            if (axiosError.response?.status !== 422) throw error
+            setErrors(axiosError.response?.data?.errors || {})
+        }
     }
 
     const logout = async () => {
@@ -182,15 +191,38 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
             .then(response => setStatus(response.data.status))
     }
 
+    const deleteAccount = async ({ setErrors, password }: DeleteAccountCredentials) => {
+        await csrf()
+
+        setErrors({})
+
+        try {
+            await axios.delete('/user', {
+                data: { password }
+            })
+            await mutate(null, false)
+            router.push('/')
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<{errors: Record<string, string[]>}>
+            if (axiosError.response?.status !== 422) throw error
+            setErrors(axiosError.response?.data?.errors || {})
+        }
+    }
+
     // ============ Navigation Middleware ============
     useEffect(() => {
-        // Attendre que les données soient chargées avant d'effectuer les redirections
+        // Ne rien faire pendant l'inscription
+        if (window.location.pathname === '/register') return
+
+        // Ne rien faire si on est en train de charger les données
         if (!user && !error) return
 
-        if (middleware === 'guest' && redirectIfAuthenticated && user)
+        // Redirection après login réussi
+        if (middleware === 'guest' && redirectIfAuthenticated && user) {
             router.push(redirectIfAuthenticated)
+        }
 
-        // Modification de la condition pour la vérification d'email
+        // Vérification d'email seulement après l'inscription
         if (
             middleware === 'auth' && 
             user && 
@@ -199,6 +231,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         ) {
             router.push('/verify-email')
         }
+
         if (
             window.location.pathname === '/verify-email' &&
             user?.email_verified_at
@@ -218,5 +251,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         forgotPassword,
         resetPassword,
         resendEmailVerification,
+        deleteAccount,
     }
 }

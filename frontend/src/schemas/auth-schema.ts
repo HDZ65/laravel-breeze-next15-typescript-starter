@@ -47,7 +47,12 @@ export const ForgotPasswordSchema = z.object({
     .email("Veuillez entrer une adresse email valide"),
 })
 
+export const DeleteAccountSchema = z.object({
+    password: z.string().min(1, "Le mot de passe est requis"),
+})
+
 export type LoginFormData = z.infer<typeof LoginSchema>
 export type RegisterFormData = z.infer<typeof RegisterSchema>
 export type ResetPasswordFormData = z.infer<typeof ResetPasswordSchema>
 export type ForgotPasswordFormData = z.infer<typeof ForgotPasswordSchema>
+export type DeleteAccountFormData = z.infer<typeof DeleteAccountSchema>

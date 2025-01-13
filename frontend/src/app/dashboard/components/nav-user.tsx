@@ -30,7 +30,8 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/auth"
-import { User } from '@/hooks/types/user'
+import DeleteAccountModal from "@/components/delete-account-modal"
+import { User } from "../../../../types/user"
 
 export function NavUser({ user }: { user: User }) {
     const { isMobile } = useSidebar()
@@ -123,6 +124,10 @@ export function NavUser({ user }: { user: User }) {
                         <DropdownMenuItem onClick={logout}>
                             <LogOut />
                             Déconnexion
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <DeleteAccountModal />
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
