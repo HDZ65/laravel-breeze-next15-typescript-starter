@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode } from 'react'
 import { useAuth } from '@/hooks/auth'
-import { User } from '@/hooks/types/user'
 import Loading from '@/app/dashboard/Loading'
+import { User } from '../../types/user'
 
 interface AuthContextType {
     user: User | null
