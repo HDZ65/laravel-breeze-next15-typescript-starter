@@ -60,24 +60,29 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
 
     // ============ Data Fetching ============
     const { data: user, error, mutate } = useSWR(
-        // Ne pas faire de requête si on est sur les pages d'auth
-        window.location.pathname === '/login' ||
-        window.location.pathname === '/register' ||
-        window.location.pathname === '/forgot-password' ||
-        window.location.pathname === '/reset-password' ||
-        middleware === 'guest'
-            ? null 
-            : '/api/user',
-        () =>
-            axios
-                .get('/api/user')
-                .then(res => res.data)
-                .catch(error => {
-                    if (error.response?.status === 401) {
-                        return null
-                    }
-                    throw error
-                }),
+        () => {
+            // Vérifier si on est côté client
+            if (typeof window === 'undefined') return null
+            
+            // Ne pas faire de requête si on est sur les pages d'auth
+            const isAuthPage = [
+                '/login',
+                '/register',
+                '/forgot-password',
+                '/reset-password'
+            ].includes(window.location.pathname)
+
+            return isAuthPage || middleware === 'guest' 
+                ? null 
+                : '/api/user'
+        },
+        () => axios
+            .get('/api/user')
+            .then(res => res.data)
+            .catch(error => {
+                if (error.response?.status === 401) return null
+                throw error
+            }),
         {
             revalidateOnFocus: false,
             revalidateOnReconnect: false,
