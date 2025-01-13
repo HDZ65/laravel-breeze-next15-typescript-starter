@@ -7,7 +7,7 @@
 
 import useSWR from 'swr'
 import axios from '@/services/axios'
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AxiosError } from 'axios'
 
@@ -130,7 +130,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         }
     }
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             if (!error) {
                 await axios.post('/logout')
@@ -141,7 +141,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
             console.error('Erreur lors de la déconnexion:', err)
             router.push('/login')
         }
-    }
+    }, [error, mutate, router])
 
     const forgotPassword = async ({ setErrors, updateIsPending, email }: ForgotPasswordCredentials) => {
         await csrf()
@@ -240,7 +240,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: AuthProps = {})
         }
 
         if (middleware === 'auth' && error) logout()
-    }, [user, error])
+    }, [user, error, router, middleware, redirectIfAuthenticated, logout])
 
     // ============ Return Values ============
     return {
