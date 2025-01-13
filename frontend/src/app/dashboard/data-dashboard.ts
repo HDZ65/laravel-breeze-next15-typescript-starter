@@ -24,12 +24,12 @@ export const data = {
     teams: [
       {
         name: process.env.NEXT_PUBLIC_APP_NAME || 'App Name',
-        logo: devethiqueLogo,
+        logo: devethiqueLogo.src,
         plan: "Enterprise",
       },
       {
         name: "Acme Corp.",
-        logo: devethiqueLogo,
+        logo: devethiqueLogo.src,
         plan: "Startup",
       }
     ],
