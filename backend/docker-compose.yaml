@@ -12,3 +12,4 @@ services:
       - DB_DATABASE=laravel_next_db
       - DB_USERNAME=admin
       - DB_PASSWORD=Shakaponk-65
+       
